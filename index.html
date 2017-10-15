@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>learn leancloud</title>
+</head>
+<body>
+	<script src="http://cdn1.lncld.net/static/js/3.2.1/av-min.js"></script>
+	<script>
+		var APP_ID = '30waQu8T7g8qb7kFQq8MInfY-gzGzoHsz';
+		var APP_KEY = 'SNaNtXfHhsBtVUgMJwB29qPB';
+
+		AV.init({
+			appId: APP_ID,
+			appKey: APP_KEY
+		});
+
+		var TestObject = AV.Object.extend('TestObject');
+		var testObject = new TestObject();
+		testObject.save({
+			words: 'hello World!'
+		}).then(function(object){
+			alert('leancloud Rocks!');
+		})
+	</script>
+</body>
+</html>
