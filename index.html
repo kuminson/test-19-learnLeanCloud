@@ -5,23 +5,140 @@
 	<title>learn leancloud</title>
 </head>
 <body>
+	<input id="username" type="text" placeholder="用户名">
+	<input id="password" type="text" placeholder="密码">
+	<input id="email" type="email" placeholder="邮箱">
+	<button type="button" id="signup">注册</button>
+	<button type="button" id="login">登录</button>
+	<button type="button" id="logout">登出</button>
+	<button type="button" id="querydata">获取</button>
+	<br>
+	<input type="text" id="title" placeholder="标题">
+	<input type="text" id="description" placeholder="描述">
+	<input type="text" id="price" placeholder="价格">
+	<input type="file" id="image" placeholder="图片">
+	<button id="update">上传数据</button>
+	<br>
+	<button id="download">获取数据</button>
+	<p id="stitle"></p>
+	<p id="sdescription"></p>
+	<p id="sprice"></p>
+	<img src="#" alt="" id="simage">
+	<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 	<script src="http://cdn1.lncld.net/static/js/3.2.1/av-min.js"></script>
 	<script>
 		var APP_ID = '30waQu8T7g8qb7kFQq8MInfY-gzGzoHsz';
 		var APP_KEY = 'SNaNtXfHhsBtVUgMJwB29qPB';
+
 
 		AV.init({
 			appId: APP_ID,
 			appKey: APP_KEY
 		});
 
-		var TestObject = AV.Object.extend('TestObject');
-		var testObject = new TestObject();
-		testObject.save({
-			words: 'hello World!'
-		}).then(function(object){
-			alert('leancloud Rocks!');
-		})
+		// 传数据
+		// var TestObject = AV.Object.extend('TestObject');
+		// var testObject = new TestObject();
+		// testObject.save({
+		// 	words: 'hello World!'
+		// }).then(function(object){
+		// 	alert('leancloud Rocks!');
+		// })
+
+		// 注册
+		$("#signup").on("click",function(){
+			var username = $("#username").val();
+			var password = $("#password").val();
+			var email = $("#email").val();
+
+			var user = new AV.User();
+			user.setUsername(username);
+			user.setPassword(password);
+			user.setEmail(email);
+			
+			user.signUp().then(function(loginedUser){
+				console.log(loginedUser);
+			}).catch(function(error){
+				console.log(error);
+			})
+		});
+
+		// 登录
+		$("#login").on("click",function(){
+			var username = $("#username").val();
+			var password = $("#password").val();
+			
+			AV.User.logIn(username, password).then(function(loginedUser){
+				console.log(loginedUser);
+			}).catch(function(error){
+				console.log(error);
+			})
+		});
+
+		// 登出
+		$("#logout").on("click",function(){
+			AV.User.logOut();
+		});
+
+		// 不登录获取数据
+		$("#querydata").on("click",function(){
+			var query = new AV.Query('TestObject');
+			query.descending('createdAt');
+			query.find().then(function(products){
+				console.log(products);
+			}).catch(function(error){
+				console.log(error);
+			})
+		});
+
+		// 上传数据
+		$("#update").on("click",function(){
+			var title = $("#title").val();
+			var price = $("#price").val();
+			var description = $("#description").val();
+
+			var currentUser = AV.User.current();
+
+			var file = $("#image")[0].files[0];
+			var name = file.name;
+			var avFile = new AV.File(name, file);
+
+			// var TestObject = AV.Object.extend('TestObject');
+			// var testObject = new TestObject();
+
+			var Product = AV.Object.extend('Product');
+			var product = new Product();
+			product.set('title', title);
+			product.set('price', price);
+			product.set('description', description);
+			product.set('owner', currentUser);
+			product.set('image', avFile);
+			product.save().then(function(state){
+				console.log(state);
+			}).catch(function(error){
+				console.log(error);
+			});
+		});
+
+		// 下载数据
+		$("#download").on("click",function(){
+			var query = new AV.Query('Product');
+			query.include('owner');
+			query.include('image');
+			query.descending('createdAt');
+			query.find().then(function(products){
+				// console.log(products);
+				var data = products[0].attributes;
+				console.log(data);
+				$("#stitle").html(data.title);
+				$("#sprice").html(data.price);
+				$("#sdescription").html(data.description);
+				$("#simage").attr("src",data.image.attributes.url);
+			}).catch(function(error){
+				console.log(error);
+			})
+		});
+
 	</script>
 </body>
 </html>
